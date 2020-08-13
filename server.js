@@ -4,6 +4,10 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const pg = require("pg");
+
+//create connection to database
+var db = new pg.Client(process.env.DATABASE_URL);
 
 // initialize the server
 const app = express();
@@ -18,8 +22,10 @@ const superagent = require("superagent");
 const PORT = process.env.PORT || 3000;
 
 // Test the server
-app.listen(PORT, () => {
-    console.log("I am listening to port: ", PORT);
+db.connect().then(() => {
+    app.listen(PORT, () => {
+        console.log("I am listening to port: ", PORT);
+    });
 });
 
 // view engine setup
@@ -31,9 +37,14 @@ app.use(express.static("./public"));
 //set the encode for post body request
 app.use(express.urlencoded({ extended: true }));
 
-// test routes
-app.get("/", (req, res) => {
-    res.render("./pages/index");
+// Home route
+app.get("/", async(req, res) => {
+    let result = await getBooksDB();
+    res.render("pages/index", {
+        books: result.books,
+        booksCount: result.booksCount
+    });
+
 });
 
 // New search route
@@ -41,21 +52,22 @@ app.get("/searches/new", (req, res) => {
     res.render("./searches/new.ejs");
 });
 
+
 //Handle sreach request
 app.post("/searches", async(req, res) => {
     let searchInput = req.body.searchInput;
     let searchType = req.body.searchType;
     let result = await getBooks(searchInput, searchType);
     if (result.status === 200) {
+        // res.send(result.booksList);
         res.render('./searches/show', {
-            books: result.booksList
+            books: result.booksList,
         });
     } else {
         res.render('./pages/error', {
-            error: result
+            error: result,
         });
     }
-
 });
 
 // fucntion to get books from google book api
@@ -68,32 +80,53 @@ function getBooks(searchInput, searchType) {
         .get(url)
         .query(queryParams)
         .then((res) => {
-            console.log(res.body);
-
+            console.log(res.body.items);
             let booksList = res.body.items.map((e) => {
                 return new Book(e);
             });
             return {
                 status: res.status,
-                booksList: booksList
-            }
+                booksList: booksList,
+            };
         })
         .catch((error) => {
             return {
                 status: error.status,
-                // message: error.response.text
+                message: error.response.text,
             };
         });
     return result;
 }
 
-// Render data in show
+
+// Get books from database
+function getBooksDB() {
+    let sql = "SELECT * FROM books";
+    return db
+        .query(sql)
+        .then((result) => {
+            console.log(result.rows);
+            return {
+                books: result.rows,
+                booksCount: result.rowCount
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 
 // creating book constructor
 function Book(data) {
-    this.image =
+    this.image_url =
         data.volumeInfo.imageLinks.thumbnail || "https://i.imgur.com/J5LVHEL.jpg";
     this.title = data.volumeInfo.title;
-    this.authers = data.volumeInfo.authors;
+    this.author = data.volumeInfo.authors;
     this.description = data.volumeInfo.description || "There is no description";
+    this.isbn =
+        (data.volumeInfo.industryIdentifiers &&
+            data.volumeInfo.industryIdentifiers[0].type +
+            " " +
+            data.volumeInfo.industryIdentifiers[0].identifier) ||
+        "There is no isbn ";
 }

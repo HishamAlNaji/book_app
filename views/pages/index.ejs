@@ -16,7 +16,22 @@
 <body>
     <%- include('../template/header')-%>
         <main>
-            <h2>Welcome!</h2>
+            <main>
+                <h2>Books shelf have
+                    <%=booksCount%> books</h2>
+                <ul>
+                    <%books.forEach((book) => {%>
+                        <li><img src=<%=book.image_url%> alt="image">
+                            <h3>
+                                <%=book.title%>
+                            </h3>
+                            <h4>
+                                <%=book.author%>
+                            </h4>
+                        </li>
+                        <%});%>
+                </ul>
+            </main>
         </main>
         <%- include('../template/footer')-%>
 
