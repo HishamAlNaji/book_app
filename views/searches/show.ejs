@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles/reset.css" />
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/layout.css" />
+    <link rel="stylesheet" href="/styles/modules.css" />
+    <title>Document</title>
+</head>
+
+<body>
+    <%- include('../template/header')-%>
+        <main>
+            <h2>Search results</h2>
+            <ul>
+                <%books.forEach((book) => {%>
+                    <li><img src=<%=book.image%> alt="image">
+                        <h3>
+                            <%=book.title%>
+                        </h3>
+                        <h4>
+                            <%=book.authers%>
+                        </h4>
+                        <p>
+                            <%=book.description%>
+                        </p>
+                    </li>
+                    <%});%>
+            </ul>
+        </main>
+        <%- include('../template/footer')-%>
+</body>
+
+</html>
