@@ -1,0 +1,19 @@
+header {
+    background-color: black;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: black;
+    height: 40px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}

@@ -10,16 +10,28 @@
     <link rel="stylesheet" href="/styles/base.css" />
     <link rel="stylesheet" href="/styles/layout.css" />
     <link rel="stylesheet" href="/styles/modules.css" />
-    <title>Book App</title>
+    <title>New Search</title>
 </head>
 
 <body>
     <%- include('../template/header')-%>
         <main>
-            <h2>Welcome!</h2>
+            <h2>Search by Title or Author</h2>
+            <form action="/searches" method="POST">
+                <input type="text" id="searchInput" name="searchInput" placeholder="Enter title or author" />
+                <fieldset>
+                    <label for="title">Title</label>
+                    <input type="radio" id="title" name="searchType" value="title" />
+                </fieldset>
+
+                <fieldset>
+                    <label for="author">Author</label>
+                    <input type="radio" id="author" name="searchType" value="author" />
+                </fieldset>
+                <input type="submit" value="Search the Google Books API" />
+            </form>
         </main>
         <%- include('../template/footer')-%>
-
 </body>
 
 </html>
