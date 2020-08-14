@@ -81,7 +81,7 @@ async function handleHome(req, res) {
 
 //Searches new form route
 function handleNew(req, res) {
-    res.render("./searches/new");
+    res.render("searches/new");
 }
 
 //Searches result
@@ -90,7 +90,7 @@ async function handleSearches(req, res) {
     let searchType = req.body.searchType;
     let result = await getBooks(searchInput, searchType);
     if (result.status === 200) {
-        res.render("./searches/show", {
+        res.render("searches/show", {
             books: result.booksList,
         });
     } else {
