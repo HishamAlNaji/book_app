@@ -29,6 +29,9 @@ db.connect().then(() => {
     });
 });
 
+// override method
+app.use(methodOverride("_method"));
+
 // view engine setup
 app.set("view engine", "ejs");
 
@@ -37,16 +40,6 @@ app.use(express.static("./public"));
 
 //set the encode for post body request
 app.use(express.urlencoded({ extended: true }));
-
-// Home route
-app.get("/", async(req, res) => {
-    let result = await getBooksDB();
-    res.render("pages/index", {
-        books: result.books,
-        booksCount: result.booksCount
-    });
-
-});
 
 // Home route
 app.get("/", handleHome);
@@ -69,8 +62,7 @@ app.delete("/books/:id", handleBookDelete);
 // Handle save book to database request
 app.post("/books/", handleSaveBook);
 
-// override method
-app.use(methodOverride("_method"));
+
 
 
 //******************************* Handling Routes *******************************//
