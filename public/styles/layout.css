@@ -1,11 +1,3 @@
-header {
-    background-color: black;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
 footer {
     position: fixed;
     left: 0;

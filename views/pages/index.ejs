@@ -1,21 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+<%- include('../template/head')-%>
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="https://www.freeiconspng.com/uploads/book-icon--icon-search-engine-6.png" type="image/x-icon" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles/reset.css" />
-    <link rel="stylesheet" href="/styles/base.css" />
-    <link rel="stylesheet" href="/styles/layout.css" />
-    <link rel="stylesheet" href="/styles/modules.css" />
-    <title>Book App</title>
-</head>
-
-<body>
-    <%- include('../template/header')-%>
-        <main>
+    <body>
+        <%- include('../template/header')-%>
             <main>
                 <h2>Books shelf have
                     <%=booksCount%> books</h2>
@@ -28,13 +16,16 @@
                             <h4>
                                 <%=book.author%>
                             </h4>
+                            <form action="/books/<%=book.id%>" method="GET">
+                                <input type="submit" value="View Details">
+                            </form>
                         </li>
                         <%});%>
                 </ul>
             </main>
-        </main>
-        <%- include('../template/footer')-%>
 
-</body>
+            <%- include('../template/footer')-%>
+
+    </body>
 
 </html>

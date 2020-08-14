@@ -1,0 +1,43 @@
+<script>
+    function toggleEdit() {
+        console.log('what!')
+        var x = document.getElementById("editBook");
+        if (x.style.display === "none") {
+            x.style.display = "flex";
+        } else {
+            x.style.display = "none";
+        }
+    }
+</script>
+<style>
+    #editBook {
+        display: none;
+    }
+</style>
+<section>
+    <img src=<%=book.image_url%> alt="image">
+    <h3>
+        <%=book.title%>
+    </h3>
+    <h4>
+        <%=book.author%>
+    </h4>
+    <p>
+        <%=book.description%>
+    </p>
+    <p>ISBN:
+        <%=book.isbn%>
+    </p>
+    <p>Bookshelf:
+        <%=book.bookshelf%>
+    </p>
+    <div class="flex-box">
+        <form>
+            <button type='button' onclick="toggleEdit()">Update details</button>
+        </form>
+        <form action="/books/<%= book.id %>?_method=DELETE" method='POST'>
+            <button type="submit">Delete book</button>
+        </form>
+    </div>
+    <%- include('edit')-%>
+</section>

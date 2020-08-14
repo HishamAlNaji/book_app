@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const pg = require("pg");
+var methodOverride = require("method-override");
 
 //create connection to database
 var db = new pg.Client(process.env.DATABASE_URL);
@@ -47,28 +48,92 @@ app.get("/", async(req, res) => {
 
 });
 
-// New search route
-app.get("/searches/new", (req, res) => {
-    res.render("./searches/new.ejs");
-});
+// Home route
+app.get("/", handleHome);
 
+// New search route
+app.get("/searches/new", handleNew);
 
 //Handle sreach request
-app.post("/searches", async(req, res) => {
+app.post("/searches", handleSearches);
+
+// Handle book details request
+app.get("/books/:id", handleBookDetails);
+
+// Handle book edit
+app.put("/books/:id", handleBookEdit);
+
+// Handle book delete
+app.delete("/books/:id", handleBookDelete);
+
+// Handle save book to database request
+app.post("/books/", handleSaveBook);
+
+//******************************* Handling Routes *******************************//
+// Home
+async function handleHome(req, res) {
+    let result = await getBooksDB();
+    res.render("pages/index", {
+        books: result.books,
+        booksCount: result.booksCount,
+    });
+}
+
+//Searches new form route
+function handleNew(req, res) {
+    res.render("./searches/new");
+}
+
+//Searches result
+async function handleSearches(req, res) {
     let searchInput = req.body.searchInput;
     let searchType = req.body.searchType;
     let result = await getBooks(searchInput, searchType);
     if (result.status === 200) {
-        // res.send(result.booksList);
-        res.render('./searches/show', {
+        res.render("./searches/show", {
             books: result.booksList,
         });
     } else {
-        res.render('./pages/error', {
+        res.render("pages/error", {
             error: result,
         });
     }
-});
+}
+
+// Search book details
+async function handleBookDetails(req, res) {
+    let id = req.params.id;
+    let book = await getBookByID(id);
+    let bookshelfs = await getBookshelfs();
+    res.render("pages/books/show", {
+        book: book,
+        bookshelfs: bookshelfs,
+    });
+}
+
+// save book route
+async function handleSaveBook(req, res) {
+    let book = req.body;
+    let lastID = await saveBook(book);
+    res.redirect(`/books/${lastID}`);
+}
+
+//Edit book
+async function handleBookEdit(req, res) {
+    let book = req.body;
+    let id = req.params.id;
+    await updateBook(id, book);
+    res.redirect(`/books/${id}`);
+}
+
+//Delete book
+async function handleBookDelete(req, res) {
+    let id = req.params.id;
+    await deleteBook(id);
+    res.redirect("/");
+}
+
+//******************************* functions *******************************//
 
 // fucntion to get books from google book api
 function getBooks(searchInput, searchType) {
@@ -80,7 +145,7 @@ function getBooks(searchInput, searchType) {
         .get(url)
         .query(queryParams)
         .then((res) => {
-            console.log(res.body.items);
+            // console.log(res.body.items);
             let booksList = res.body.items.map((e) => {
                 return new Book(e);
             });
@@ -97,29 +162,117 @@ function getBooks(searchInput, searchType) {
         });
     return result;
 }
-
-
 // Get books from database
 function getBooksDB() {
     let sql = "SELECT * FROM books";
     return db
         .query(sql)
         .then((result) => {
-            console.log(result.rows);
             return {
                 books: result.rows,
-                booksCount: result.rowCount
-            }
+                booksCount: result.rowCount,
+            };
         })
         .catch((error) => {
             console.log(error);
         });
 }
 
+// Get book by ID from database
+function getBookByID(id) {
+    let sql = `SELECT * FROM books WHERE id=$1;`;
+    let values = [id];
+    return db
+        .query(sql, values)
+        .then((result) => {
+            // console.log(result);
+            return result.rows[0];
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+// save book to database
+function saveBook(book) {
+    let sql = `INSERT INTO books (author, title, isbn, image_url, description, bookshelf) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`;
+    let values = [
+        book.author,
+        book.title,
+        book.isbn,
+        book.image_url,
+        book.description,
+        book.bookshelf,
+    ];
+    return db
+        .query(sql, values)
+        .then((res) => {
+            // console.log(res);
+            return res.rows[0].id;
+        })
+        .catch((error) => {
+            console.log("error", error);
+        });
+}
+
+// get all bookshilfs in thae database
+function getBookshelfs() {
+    let sql = "SELECT DISTINCT bookshelf FROM books";
+    return db
+        .query(sql)
+        .then((res) => {
+            return res.rows;
+        })
+        .catch((error) => {
+            console.log("error", error);
+        });
+}
+
+// function to update book in the database
+function updateBook(id, book) {
+    let sql =
+        "UPDATE books SET author = $1, title = $2, isbn= $3, image_url =$4, description =$5, bookshelf=$6 WHERE id = $7;";
+    let values = [
+        book.author,
+        book.title,
+        book.isbn,
+        book.image_url,
+        book.description,
+        book.bookshelf,
+        id,
+    ];
+
+    return db
+        .query(sql, values)
+        .then((res) => {
+            console.log(res);
+            // return res.rows[0].id;
+        })
+        .catch((error) => {
+            console.log("error", error);
+        });
+}
+
+//function to delete a book from database
+function deleteBook(id) {
+    let sql = 'DELETE FROM books WHERE id=$1';
+    let values = [id];
+    return db
+        .query(sql, values)
+        .then((res) => {
+            // console.log(res);
+        })
+        .catch((error) => {
+            console.log("error", error);
+        });
+
+}
+// ******************* Book Constructor ****************** //
 // creating book constructor
 function Book(data) {
     this.image_url =
-        data.volumeInfo.imageLinks.thumbnail || "https://i.imgur.com/J5LVHEL.jpg";
+        (data.volumeInfo.imageLinks && data.volumeInfo.imageLinks.thumbnail) ||
+        "https://i.imgur.com/J5LVHEL.jpg";
     this.title = data.volumeInfo.title;
     this.author = data.volumeInfo.authors;
     this.description = data.volumeInfo.description || "There is no description";

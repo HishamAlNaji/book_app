@@ -1,4 +1,22 @@
 <header>
-    <h1>Best Books!</h1>
-    <i class="fas fa-bars"></i>
+    <div class="topnav">
+        <a href="/" class="active">Best Books!</a>
+        <div id="myLinks">
+            <a href="/">Home</a>
+            <a href="/searches/new">Search the Google Books API</a>
+        </div>
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+        </a>
+    </div>
 </header>
+<script>
+    function myFunction() {
+        var x = document.getElementById("myLinks");
+        if (x.style.display === "block") {
+            x.style.display = "none";
+        } else {
+            x.style.display = "block";
+        }
+    }
+</script>
