@@ -69,6 +69,10 @@ app.delete("/books/:id", handleBookDelete);
 // Handle save book to database request
 app.post("/books/", handleSaveBook);
 
+// override method
+app.use(methodOverride("_method"));
+
+
 //******************************* Handling Routes *******************************//
 // Home
 async function handleHome(req, res) {
